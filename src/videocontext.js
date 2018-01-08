@@ -487,7 +487,7 @@ export default class VideoContext{
     * var ctx = new VideoContext(canvasElement);
     * var videoNode = ctx.video(videoElement);
     */
-    dash(mpd, sourceOffset=0, preloadTime=4, videoElementAttributes={ crossorigin: "anonymous" }){
+    dash(mpd, sourceOffset=0, preloadTime=4, videoElementAttributes={}){
         let dashNode = new DashNode(mpd, this._gl, this._renderGraph, this._currentTime, this._playbackRate, sourceOffset, preloadTime, this._videoElementCache, videoElementAttributes);
         this._sourceNodes.push(dashNode);
         return dashNode;
