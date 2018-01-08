@@ -1,5 +1,23 @@
 // Peter Taylour, R&D User Experience,© BBC 2015
 import SourceNode, { SOURCENODESTATE } from "./sourcenode";
+import { MediaPlayer } from "dashjs";
+
+function createMediaPlayer(mpdURL, videoElement) {
+    const dashplayer = MediaPlayer().create();
+    dashplayer.getDebug().setLogToBrowserConsole(false); // TODO toggle via dev env
+    dashplayer.initialize(videoElement, mpdURL, false);
+
+    // For now just use lowest quality
+    dashplayer.setAutoSwitchQualityFor("video", false);
+    dashplayer.on("playbackMetaDataLoaded", () => {
+        const videoQualities = dashplayer.getBitrateInfoListFor("video");
+        dashplayer.setQualityFor("video", videoQualities.length - 1);
+    });
+
+    return {
+        setVolume: val => dashplayer.setVolume(val.toFloat())
+    };
+}
 
 class DashNode extends SourceNode {
     /**
@@ -17,8 +35,9 @@ class DashNode extends SourceNode {
         videoElementCache = undefined,
         attributes = {}
     ) {
-        super(undefined, gl, renderGraph, currentTime);
-        this.mpd = mpd
+        const videoElement = undefined; // Created automatically on load
+        super(videoElement, gl, renderGraph, currentTime);
+        this._mpd = mpd;
         this._preloadTime = preloadTime;
         this._sourceOffset = sourceOffset;
         this._globalPlaybackRate = globalPlaybackRate;
@@ -72,7 +91,7 @@ class DashNode extends SourceNode {
 
     _load() {
         super._load();
-        if (this._element !== undefined) {
+        if (this._mediaPlayer !== undefined) {
             for (var key in this._attributes) {
                 this._element[key] = this._attributes[key];
             }
@@ -84,7 +103,7 @@ class DashNode extends SourceNode {
                         this._stopTime == undefined
                     ) {
                         this._stopTime =
-                            this._startTime + this._element.duration;
+                            this._startTime + this._element.duration;  // TODO: Assume this is correct for dash controlled element
                         this._triggerCallbacks("durationchange", this.duration);
                     }
                 }
@@ -111,15 +130,8 @@ class DashNode extends SourceNode {
                 this._element.setAttribute("playsinline", "");
                 this._playbackRateUpdated = true;
             }
-            this._element.volume = this._volume;
-            if (
-                window.MediaStream !== undefined &&
-                this._elementURL instanceof MediaStream
-            ) {
-                this._element.srcObject = this._elementURL;
-            } else {
-                this._element.src = this._elementURL;
-            }
+            this._mediaPlayer = createMediaPlayer(this._mpd, this._element);
+            this._mediaPlayer.setVolume = this._volume;
 
             for (let key in this._attributes) {
                 this._element[key] = this._attributes[key];
