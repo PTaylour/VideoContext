@@ -7,7 +7,6 @@ class DashNode extends SourceNode {
      * This should not be called directly, but created through a call to videoContext.dash();
      */
     constructor(
-        element,
         mpd,
         gl,
         renderGraph,
@@ -18,7 +17,7 @@ class DashNode extends SourceNode {
         videoElementCache = undefined,
         attributes = {}
     ) {
-        super(element, gl, renderGraph, currentTime);
+        super(undefined, gl, renderGraph, currentTime);
         this.mpd = mpd
         this._preloadTime = preloadTime;
         this._sourceOffset = sourceOffset;
