@@ -15,7 +15,8 @@ function createMediaPlayer(mpdURL, videoElement) {
     });
 
     return {
-        setVolume: val => dashplayer.setVolume(val.toFloat())
+        setVolume: val => dashplayer.setVolume(val.toFloat()),
+        setCurrentTime: val => console.log(val, 'todo')
     };
 }
 
@@ -137,11 +138,11 @@ class DashNode extends SourceNode {
                 this._element[key] = this._attributes[key];
             }
         }
-        if (this._element) {
+        if (this._mediaPlayer) {
             let currentTimeOffset = 0;
             if (this._currentTime > this._startTime)
                 currentTimeOffset = this._currentTime - this._startTime;
-            this._element.currentTime = this._sourceOffset + currentTimeOffset;
+            this._mediaPlayer.setCurrentTime(this._sourceOffset + currentTimeOffset);
             this._element.onerror = () => {
                 if (this._element === undefined) return;
                 console.debug("Error with element", this._element);
