@@ -1,5 +1,6 @@
 //Matthew Shotton, R&D User Experience,© BBC 2015
 import VideoNode from "./SourceNodes/videonode.js";
+import DashNode from "./SourceNodes/dashnode.js";
 import ImageNode from "./SourceNodes/imagenode.js";
 import CanvasNode from "./SourceNodes/canvasnode.js";
 import { SOURCENODESTATE } from "./SourceNodes/sourcenode.js";
@@ -66,7 +67,7 @@ export default class VideoContext{
             if (!options.videoElementCacheSize) options.videoElementCacheSize = 5;
             this._videoElementCache = new VideoElementCache(options.videoElementCacheSize);
         }
-        
+
         // Create a unique ID for this VideoContext which can be used in the debugger.
         if(this._canvas.id) {
             if (typeof this._canvas.id === "string" || this._canvas.id instanceof String){
@@ -463,6 +464,35 @@ export default class VideoContext{
         this._sourceNodes.push(videoNode);
         return videoNode;
     }
+
+    // TODO this is just for experimentaiton.
+    // TODO in the future Video and Dash nodes should have a have a commond ansester
+    /**
+    * Create a new node representing a dash video source
+    *
+    * @param {string|Video} - The url for the video MPD.
+    * @sourceOffset {number} - Offset into the start of the source video to start playing from.
+    * @preloadTime {number} - How many seconds before the video is to be played to start loading it.
+    * @videoElementAttributes {Object} - A dictionary of attributes to map onto the underlying video element.
+    * @return {DashNode} A new video node.
+    *
+    * @example
+    * var canvasElement = document.getElementById("canvas");
+    * var ctx = new VideoContext(canvasElement);
+    * var videoNode = ctx.video("video.mp4");
+    *
+    * @example
+    * var canvasElement = document.getElementById("canvas");
+    * var videoElement = document.getElementById("video");
+    * var ctx = new VideoContext(canvasElement);
+    * var videoNode = ctx.video(videoElement);
+    */
+    dash(mpd, sourceOffset=0, preloadTime=4, videoElementAttributes={}){
+        let dashNode = new DashNode(mpd, this._gl, this._renderGraph, this._currentTime, this._playbackRate, sourceOffset, preloadTime, this._videoElementCache, videoElementAttributes);
+        this._sourceNodes.push(dashNode);
+        return dashNode;
+    }
+
 
     /**
     * @depricated
