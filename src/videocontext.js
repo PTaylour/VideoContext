@@ -488,7 +488,8 @@ export default class VideoContext{
     * var videoNode = ctx.video(videoElement);
     */
     dash(mpd, sourceOffset=0, preloadTime=4, videoElementAttributes={}){
-        let dashNode = new DashNode(mpd, this._gl, this._renderGraph, this._currentTime, this._playbackRate, sourceOffset, preloadTime, this._videoElementCache, videoElementAttributes);
+        const element = document.createElement("video")
+        let dashNode = new DashNode(element, mpd, this._gl, this._renderGraph, this._currentTime, this._playbackRate, sourceOffset, preloadTime, this._videoElementCache, videoElementAttributes);
         this._sourceNodes.push(dashNode);
         return dashNode;
     }
